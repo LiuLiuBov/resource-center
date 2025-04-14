@@ -14,7 +14,6 @@ const ukraineRegions = [
     "Zaporizhzhia Oblast",
     "Ivano-Frankivsk Oblast",
     "Kyiv Oblast",
-    "Kirovohrad Oblast",
     "Luhansk Oblast",
     "Lviv Oblast",
     "Mykolaiv Oblast",
@@ -40,7 +39,7 @@ const CreateRequestPage = () => {
   const [location, setLocation] = useState(ukraineRegions[0]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); //prevents the default form submission behavior (which would reload the page)
     try {
       await axios.post('http://localhost:8000/api/requests', { title, description, location }, {
         headers: {

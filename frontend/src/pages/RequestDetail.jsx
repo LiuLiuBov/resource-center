@@ -14,7 +14,6 @@ const ukraineRegions = [
   "Zaporizhzhia Oblast",
   "Ivano-Frankivsk Oblast",
   "Kyiv Oblast",
-  "Kirovohrad Oblast",
   "Luhansk Oblast",
   "Lviv Oblast",
   "Mykolaiv Oblast",

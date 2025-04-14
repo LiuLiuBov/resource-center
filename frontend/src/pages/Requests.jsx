@@ -34,7 +34,7 @@ const Requests = () => {
       );
       console.log("Active API Response:", response.data);
       setActiveRequests(
-        Array.isArray(response.data.requests) ? response.data.requests : []
+        response.data.requests
       );
       setActiveTotalPages(response.data.totalPages);
     } catch (err) {
@@ -57,7 +57,7 @@ const Requests = () => {
       );
       console.log("Deactivated API Response:", response.data);
       setDeactivatedRequests(
-        Array.isArray(response.data.requests) ? response.data.requests : []
+        response.data.requests
       );
       setDeactivatedTotalPages(response.data.totalPages);
     } catch (err) {

@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 const Profile = () => {
-  const { user, updateUser, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, updateUser} = useAuth();
   const { id } = useParams(); // Get the user ID from the URL
 
   const [profileUser, setProfileUser] = useState(null);
@@ -24,7 +23,7 @@ const Profile = () => {
         const res = await fetch(`http://localhost:8000/api/auth/user/${id}`, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${user?.token}`, // Include the token
+            Authorization: `Bearer ${user?.token}`,
           },
         });
         const data = await res.json();
