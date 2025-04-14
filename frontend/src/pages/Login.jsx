@@ -16,23 +16,39 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    if (!email || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    if (password.length < 8) {
+      alert("Password must be at least 8 characters long.");
+      return;
+    }
+  
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailPattern.test(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+  
     const res = await fetch("http://localhost:8000/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
+  
     const data = await res.json();
-    console.log("data:", data)
     if (res.ok) {
       const { token, user } = data;
-
       login(token, user); 
       navigate("/"); 
     } else {
       alert(data.message);
     }
   };
+  
 
   return (
     <div className="relative flex items-center justify-center min-h-screen w-full bg-[#080710]">
@@ -68,15 +84,6 @@ const Login = () => {
             Увійти
           </button>
         </form>
-
-        {/* <div className="flex justify-center space-x-4 mt-6">
-          <button className="w-1/2 py-2 bg-white/20 text-white rounded-md flex items-center justify-center hover:bg-white/30 transition">
-            <i className="fab fa-google mr-2"></i> Google
-          </button>
-          <button className="w-1/2 py-2 bg-white/20 text-white rounded-md flex items-center justify-center hover:bg-white/30 transition">
-            <i className="fab fa-facebook mr-2"></i> Facebook
-          </button>
-        </div> */}
 
         <p className="text-center text-white mt-4">
           Немає акаунта?{" "}
