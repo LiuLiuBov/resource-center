@@ -23,13 +23,22 @@ router.post("/register", async (req, res) => {
   try {
     const { name, email, password, confirmPassword, phone, location, bio } = req.body;
 
+    if (!name || !email || !password || !confirmPassword) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
     if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Паролі не співпадають." });
+      return res.status(400).json({ message: "Passwords do not match." });
+    }
+
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailPattern.test(email)) {
+      return res.status(400).json({ message: "Invalid email format." });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Цей email вже зареєстрований." });
+      return res.status(400).json({ message: "This email is already registered." });
     }
 
     const icons = ["user_icon2.jpeg", "user_icon4.jpeg"];
@@ -52,44 +61,35 @@ router.post("/register", async (req, res) => {
 
     const verificationLink = `http://localhost:8000/api/auth/verify-email?token=${user.verificationToken}`;
 
-    console.log("🚀 Attempting to send verification email...");
-    console.log("🔑 Verification Link:", verificationLink);
-    console.log("📧 Sending email to:", user.email);
-    console.log("📧 Sending email from:", process.env.EMAIL_USER);
-    console.log("Subject: Підтвердіть вашу електронну пошту");
-
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
-      subject: "Підтвердіть вашу електронну пошту",
-      html: `<p>Будь ласка, підтвердіть вашу електронну пошту, натиснувши <a href="${verificationLink}">тут</a>.</p>`,
+      subject: "Confirm your email address",
+      html: `<p>Please confirm your email by clicking <a href="${verificationLink}">here</a>.</p>`,
     });
 
-    res.status(201).json({ message: "Користувач успішно зареєстрований. Будь ласка, перевірте пошту для підтвердження." });
+    res.status(201).json({ message: "Registration successful. Please verify your email." });
   } catch (err) {
     console.error("❌ Registration error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-
-
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
 
-    if (!user) return res.status(404).json({ message: "Користувач не знайдений" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    console.log("🔍 Found user:", user);
-    console.log("🔑 Entered password:", password);
-    console.log("🔒 Stored hashed password:", user.password);
+    if (!user.emailVerified) {
+      return res.status(403).json({ message: "Please verify your email first." });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      console.log("❌ Password mismatch!");
-      return res.status(400).json({ message: "Невірний пароль" });
+      return res.status(400).json({ message: "Incorrect password" });
     }
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -101,11 +101,12 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
 router.get("/verify-email", async (req, res) => {
   const { token } = req.query;
 
   if (!token) {
-    return res.status(400).send("Невірне посилання");
+    return res.status(400).send("Неправильне посилання");
   }
 
   try {
@@ -129,6 +130,10 @@ router.patch("/update-profile", authMiddleware, async (req, res) => {
   const { phone, location, bio, profilePicture } = req.body;
   const userId = req.user.id;
 
+  if (!phone && !location && !bio && !profilePicture) {
+    return res.status(400).json({ message: "At least one field must be updated." });
+  }
+
   try {
     const user = await User.findById(userId);
 
@@ -149,6 +154,7 @@ router.patch("/update-profile", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error updating profile" });
   }
 });
+
 
 router.get("/user/:id", authMiddleware, async (req, res) => {
   try {

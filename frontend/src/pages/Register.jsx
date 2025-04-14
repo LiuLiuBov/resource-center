@@ -8,7 +8,6 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [profilePicture, setProfilePicture] = useState("");
   const [location, setLocation] = useState("");
   const [bio, setBio] = useState("");
   const navigate = useNavigate();
@@ -22,6 +21,16 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!name || !email || !password || !confirmPassword) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    if (password.length < 8) {
+      alert("Password must be at least 8 characters long.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       alert("Passwords do not match");
@@ -61,7 +70,6 @@ const Register = () => {
     "Zaporizhzhia Oblast",
     "Ivano-Frankivsk Oblast",
     "Kyiv Oblast",
-    "Kirovohrad Oblast",
     "Luhansk Oblast",
     "Lviv Oblast",
     "Mykolaiv Oblast",
