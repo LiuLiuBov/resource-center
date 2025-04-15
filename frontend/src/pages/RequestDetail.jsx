@@ -45,6 +45,7 @@ const RequestDetail = () => {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editLocation, setEditLocation] = useState("");
+  const [canSend, setCanSend] = useState(true);
 
   const isAdmin = user?.role === "admin";
 
@@ -133,8 +134,10 @@ const RequestDetail = () => {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !canSend) return;
+  
     try {
+      setCanSend(false);
       await axios.post(
         `http://localhost:8000/api/requests/${id}/chat`,
         { message: newMessage },
@@ -142,10 +145,14 @@ const RequestDetail = () => {
       );
       setNewMessage("");
       fetchChatMessages();
+  
+      setTimeout(() => setCanSend(true), 3000);
     } catch (err) {
       console.error("Error sending message:", err);
+      setCanSend(true);
     }
   };
+  
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -421,11 +428,15 @@ const RequestDetail = () => {
               className="w-[600px] p-2 bg-gray-600 text-white rounded-md focus:outline-none"
             />
             <button
-              type="submit"
-              className="ml-auto bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md"
-            >
-              Send
-            </button>
+  type="submit"
+  disabled={!canSend}
+  className={`ml-auto px-4 py-2 rounded-md ${
+    canSend ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-600 cursor-not-allowed"
+  }`}
+>
+  Send
+</button>
+
           </form>
         </div>
       </div>
